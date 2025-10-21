@@ -66,7 +66,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 @app.on_event("startup")
 async def startup_event():
     """Startup event handler"""
-    logger.info("Starting up LLM Query Retrieval System...")
+    logger.info("Starting up DocuMind AI...")
     
     # Create directories
     Path(settings.UPLOAD_FOLDER).mkdir(exist_ok=True)
@@ -118,7 +118,7 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     """Shutdown event handler"""
-    logger.info("Shutting down LLM Query Retrieval System...")
+    logger.info("Shutting down DocuMind AI...")
 
 @app.get("/health")
 async def health_check():
@@ -134,7 +134,7 @@ async def health_check():
 async def root():
     """Root endpoint"""
     return {
-        "message": "LLM Query Retrieval System API",
+        "message": "DocuMind AI - Intelligent Document Query System",
         "version": settings.VERSION,
         "docs": "/docs",
         "database_status": "enabled" if settings.USE_DATABASE else "disabled"

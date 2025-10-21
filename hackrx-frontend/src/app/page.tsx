@@ -30,11 +30,11 @@ export default function Home() {
               <Brain className="h-8 w-8" />
             </div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              LLM Query Retrieval System
+              DocuMind AI
             </h1>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Upload documents and ask intelligent questions. Powered by AI for insurance, legal, HR, and compliance domains.
+            Intelligent Document Query System powered by AI & Vector Search. Upload documents and get instant, accurate answers.
           </p>
         </div>
 
@@ -84,11 +84,10 @@ export default function Home() {
         {/* Footer */}
         <footer className="mt-16 pt-8 border-t border-gray-200 text-center text-sm text-gray-500">
           <p>
-            Built with Next.js, FastAPI, PostgreSQL, and OpenAI • 
-            <span className="font-medium"> Team BajajPaglu</span>
+            Built with Next.js, FastAPI, PostgreSQL, and Google Gemini AI
           </p>
           <p className="mt-2">
-            Hackathon Project - LLM-Powered Intelligent Query-Retrieval System
+            Made with <span className="text-red-500">❤️</span> by Udit Sharma
           </p>
         </footer>
       </div>

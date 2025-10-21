@@ -7,7 +7,7 @@ load_dotenv()
 class Settings:
     # API Settings
     API_V1_STR: str = "/api/v1"
-    PROJECT_NAME: str = "LLM Query Retrieval System"
+    PROJECT_NAME: str = "DocuMind AI"
     VERSION: str = "1.0.0"
     
     # Database Settings
