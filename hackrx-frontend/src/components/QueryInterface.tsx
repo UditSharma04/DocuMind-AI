@@ -5,12 +5,11 @@ import { Send, MessageSquare, Bot, User, Loader2, FileText, AlertCircle } from '
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { runQuery, runDemoQuery, QueryRequest } from '@/lib/api';
+import { runQuery, QueryRequest } from '@/lib/api';
+import DocumentSelector from './DocumentSelector';
 
 interface QueryResult {
   id: string;
@@ -25,7 +24,7 @@ interface QueryInterfaceProps {
 }
 
 export function QueryInterface({ uploadedFiles = [] }: QueryInterfaceProps) {
-  const [documentUrl, setDocumentUrl] = useState('');
+  const [selectedDocuments, setSelectedDocuments] = useState<number[]>([]);
   const [questions, setQuestions] = useState<string[]>(['']);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<QueryResult[]>([]);
@@ -50,8 +49,8 @@ export function QueryInterface({ uploadedFiles = [] }: QueryInterfaceProps) {
   const handleSubmit = async () => {
     const validQuestions = questions.filter(q => q.trim());
     
-    if (!documentUrl.trim() && uploadedFiles.length === 0) {
-      setError('Please provide a document URL or upload a document first');
+    if (selectedDocuments.length === 0) {
+      setError('Please select at least one document to use as context');
       return;
     }
     
@@ -64,12 +63,12 @@ export function QueryInterface({ uploadedFiles = [] }: QueryInterfaceProps) {
     setError(null);
 
     try {
+      // Use document IDs instead of URLs - backend will handle document lookup
       const request: QueryRequest = {
-        documents: documentUrl ? [documentUrl] : [`uploaded-${uploadedFiles[0]?.id}`],
+        documents: selectedDocuments.map(id => `document-${id}`),
         questions: validQuestions,
       };
 
-      // Use real endpoint with Gemini integration
       const response = await runQuery(request);
       
       const newResults: QueryResult[] = validQuestions.map((question, index) => ({
@@ -77,14 +76,13 @@ export function QueryInterface({ uploadedFiles = [] }: QueryInterfaceProps) {
         question,
         answer: response.answers[index] || 'No answer provided',
         timestamp: new Date(),
-        documentUrl: request.documents,
+        documentUrl: `${selectedDocuments.length} selected documents`,
       }));
 
       setResults(prev => [...newResults, ...prev]);
       
-      // Reset form
+      // Reset form but keep document selection
       setQuestions(['']);
-      setDocumentUrl('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to process query');
     } finally {
@@ -94,6 +92,12 @@ export function QueryInterface({ uploadedFiles = [] }: QueryInterfaceProps) {
 
   return (
     <div className="space-y-6">
+      {/* Document Selection */}
+      <DocumentSelector 
+        selectedDocuments={selectedDocuments}
+        onSelectionChange={setSelectedDocuments}
+      />
+
       {/* Query Input Form */}
       <Card>
         <CardHeader>
@@ -102,34 +106,10 @@ export function QueryInterface({ uploadedFiles = [] }: QueryInterfaceProps) {
             Ask Questions About Your Documents
           </CardTitle>
           <CardDescription>
-            Provide a document URL or use uploaded files, then ask intelligent questions
+            Ask intelligent questions about your selected documents
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Document Source */}
-          <div className="space-y-2">
-            <Label htmlFor="documentUrl">Document URL (or use uploaded files)</Label>
-            <Input
-              id="documentUrl"
-              placeholder="https://example.com/document.pdf"
-              value={documentUrl}
-              onChange={(e) => setDocumentUrl(e.target.value)}
-              disabled={uploadedFiles.length > 0}
-            />
-            {uploadedFiles.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                <span className="text-sm text-gray-600">Using uploaded files:</span>
-                {uploadedFiles.map((file) => (
-                  <Badge key={file.id} variant="secondary" className="text-xs">
-                    <FileText className="h-3 w-3 mr-1" />
-                    {file.name}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <Separator />
 
           {/* Questions */}
           <div className="space-y-3">

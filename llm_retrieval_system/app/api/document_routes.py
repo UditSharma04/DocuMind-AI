@@ -136,12 +136,28 @@ async def get_document(document_id: int, db: Session = Depends(get_db)):
 
 @router.delete("/{document_id}")
 async def delete_document(document_id: int, db: Session = Depends(get_db)):
-    """Delete a document and its chunks"""
+    """Delete a document and all associated chunks and embeddings"""
     document = db.query(Document).filter(Document.id == document_id).first()
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
     
-    db.delete(document)
-    db.commit()
+    # Get chunks count for response
+    chunks_count = len(document.chunks) if hasattr(document, 'chunks') else 0
     
-    return {"message": "Document deleted successfully"}
+    try:
+        # Delete document (cascading deletes will handle chunks and embeddings)
+        db.delete(document)
+        db.commit()
+        
+        logger.info(f"Successfully deleted document {document_id} with {chunks_count} chunks")
+        
+        return {
+            "message": "Document deleted successfully",
+            "document_id": document_id,
+            "filename": document.filename,
+            "chunks_deleted": chunks_count
+        }
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error deleting document {document_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete document: {str(e)}")

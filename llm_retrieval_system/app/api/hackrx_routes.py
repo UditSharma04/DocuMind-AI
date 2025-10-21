@@ -47,12 +47,26 @@ async def hackrx_run(
         
         answers = []
         
+        # Parse document IDs from request.documents if they use document-ID format
+        selected_document_ids = []
+        for doc_ref in request.documents:
+            if doc_ref.startswith("document-"):
+                # Extract document ID
+                try:
+                    doc_id = int(doc_ref.replace("document-", ""))
+                    selected_document_ids.append(doc_id)
+                except ValueError:
+                    logger.warning(f"Invalid document reference: {doc_ref}")
+        
+        logger.info(f"Selected document IDs: {selected_document_ids}")
+        
         # Process each question
         for question in request.questions:
-            # Perform semantic search
+            # Perform semantic search with document filtering
             relevant_chunks = search_service.semantic_search(
                 query=question,
-                top_k=5
+                top_k=5,
+                document_ids=selected_document_ids if selected_document_ids else None
             )
             
             if not relevant_chunks:

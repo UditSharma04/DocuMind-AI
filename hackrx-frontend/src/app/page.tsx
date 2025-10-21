@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Brain, FileText, MessageSquare } from 'lucide-react';
+import { Brain, FileText, MessageSquare, Database } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DocumentUpload } from '@/components/DocumentUpload';
 import { QueryInterface } from '@/components/QueryInterface';
 import { StatusBar } from '@/components/StatusBar';
+import DocumentManager from '@/components/DocumentManager';
 
 interface UploadedFile {
   id: string;
@@ -42,14 +43,18 @@ export default function Home() {
 
         {/* Main Content */}
         <Tabs defaultValue="upload" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Document Upload
+              Upload
+            </TabsTrigger>
+            <TabsTrigger value="manage" className="flex items-center gap-2">
+              <Database className="h-4 w-4" />
+              Manage
             </TabsTrigger>
             <TabsTrigger value="query" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
-              Query Interface
+              Query
             </TabsTrigger>
           </TabsList>
 
@@ -61,10 +66,14 @@ export default function Home() {
                 <h3 className="font-medium text-green-800 mb-2">Ready for Queries!</h3>
                 <p className="text-sm text-green-700">
                   You have {uploadedFiles.length} document{uploadedFiles.length !== 1 ? 's' : ''} uploaded. 
-                  Switch to the Query Interface tab to start asking questions.
+                  Switch to the Manage tab to view all documents or Query tab to start asking questions.
                 </p>
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="manage" className="space-y-6">
+            <DocumentManager onDocumentDeleted={() => setUploadedFiles([])} />
           </TabsContent>
 
           <TabsContent value="query" className="space-y-6">
